@@ -91,7 +91,7 @@ new Watermark(option);
 
 方式1 - 监听文件改变，自动触发回调：[在线demo](https://gisonyeung.github.io/js-watermark/demo/example1.html)
 
-方式2 - 传入file控件Id，通过主动调用实例方法生成水印图：[在线demo](https://gisonyeung.github.io/js-watermark/demo/example2.html)
+方式2 - 传入 file 控件 Id，通过主动调用实例方法生成水印图：[在线demo](https://gisonyeung.github.io/js-watermark/demo/example2.html)
 
 方式3 - 传入 base64 编码的图片，通过主动调用实例方法生成水印图：[在线demo](https://gisonyeung.github.io/js-watermark/demo/example3.html)
 
