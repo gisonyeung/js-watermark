@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js-watermark</title>
+	<style>
+		* {
+			font-family: Microsoft Yahei; 
+		}
+		img {
+			max-width: 100%;
+		}
+	</style>
+</head>
+<body>
+	<h2>方式1 - 监听文件改变，自动触发回调</h2>
+	<div>
+		<div>
+			<label for="test1">水印文字1</label>
+			<input type="text" id="text1" value="js-watermark 水印文字">
+			<label for="size1">大小</label>
+			<input type="text" id="size1" value="4vw" placeholder="单位px或vw，100vw等于当前图片宽度">
+			<label for="level1">水平距离</label>
+			<input type="text" id="level1" placeholder="数字" value="100">
+			<label for="vertical1">垂直距离</label>
+			<input type="text" id="vertical1" placeholder="数字，图片顶部到字体基线的距离" value="100">
+		</div>
+		<div>
+			<label for="test2">水印文字2</label>
+			<input type="text" id="text2"> 
+			<label for="size2">大小</label>
+			<input type="text" id="size2" placeholder="单位px或vw，100vw等于当前图片宽度">
+			<label for="level2">水平距离</label>
+			<input type="text" id="level2" placeholder="数字">
+			<label for="vertical2">垂直距离</label>
+			<input type="text" id="vertical2" placeholder="数字，图片顶部到字体基线的距离">
+		</div>
+		<label for="format">图片格式</label>
+		<select id="format">
+			<option value="jpeg" selected>jpeg</option>
+			<option value="png">png</option>
+		</select>
+	</div>
+	<div>
+		<input type="file" id="file">
+	</div>
+	<div>
+		<h3>原图：</h3>
+		<img src="" id="preview">
+	</div>
+	<div>
+		<h3>水印图</h3>
+		<img src="" id="result">
+	</div>
+	<script src="../src/js-watermark.js"></script>
+	<script>
+		new Watermark({
+			fileControlId: 'file',
+			fontSize: '30px',
+			addPreviewListener: function(src, sizes) {
+				document.getElementById('preview').src = src;
+
+				this.addText(document.getElementById('text1').value, {
+					fontSize: document.getElementById('size1').value,
+					left: document.getElementById('level1').value || 10,
+					top: document.getElementById('vertical1').value || 10
+				});
+
+				this.addText(document.getElementById('text2').value, {
+					fontSize: document.getElementById('size2').value,
+					color: '#000',
+					left: document.getElementById('level2').value || 10,
+					top: document.getElementById('vertical2').value || 10
+				});
+
+				document.getElementById('result').src = this.render(document.getElementById('format').value);
+
+			},
+		})
+	</script>
+</body>
+</html>

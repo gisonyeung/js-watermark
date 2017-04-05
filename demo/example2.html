@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>js-watermark</title>
+	<style>
+		* {
+			font-family: Microsoft Yahei; 
+		}
+		img {
+			max-width: 100%;
+		}
+	</style>
+</head>
+<body>
+	<h2>方式2 - 传入file控件Id，通过主动调用实例方法生成水印图</h2>
+	<div>
+		<div>
+			<label for="test1">水印文字1</label>
+			<input type="text" id="text1" value="js-watermark 水印文字">
+			<label for="size1">大小</label>
+			<input type="text" id="size1" value="4vw" placeholder="单位px或vw，100vw等于当前图片宽度">
+			<label for="level1">水平距离</label>
+			<input type="text" id="level1" placeholder="数字" value="100">
+			<label for="vertical1">垂直距离</label>
+			<input type="text" id="vertical1" placeholder="数字，图片顶部到字体基线的距离" value="100">
+		</div>
+		<div>
+			<label for="test2">水印文字2</label>
+			<input type="text" id="text2"> 
+			<label for="size2">大小</label>
+			<input type="text" id="size2" placeholder="单位px或vw，100vw等于当前图片宽度">
+			<label for="level2">水平距离</label>
+			<input type="text" id="level2" placeholder="数字">
+			<label for="vertical2">垂直距离</label>
+			<input type="text" id="vertical2" placeholder="数字，图片顶部到字体基线的距离">
+		</div>
+		<label for="format">图片格式</label>
+		<select id="format">
+			<option value="jpeg" selected>jpeg</option>
+			<option value="png">png</option>
+		</select>
+
+	</div>
+	<div>
+		<input type="file" id="file">
+	</div>
+	<div>
+		<input type="button" value="生成原图" id="preview-btn">
+		<input type="button" value="生成水印图" id="result-btn">
+	</div>
+	<div>
+		<h3>原图：</h3>
+		<img src="" id="preview">
+	</div>
+	<div>
+		<h3>水印图</h3>
+		<img src="" id="result">
+	</div>
+	<script src="../src/js-watermark.js"></script>
+	<script>
+	    var watermark = new Watermark();
+
+	    // 点击生成原图
+	    document.getElementById('preview-btn').addEventListener('click', function() {
+
+		    // 每次调用时读取控件中的文件
+		    if (watermark.setFile('file')) {
+			    // setFile 内部调用 FileReader 方法，FileReader 为异步操作，
+			    // 为了避免出错这里需要手动加一个 setTimeout
+			    setTimeout(function() {
+			    	document.getElementById('preview').src = watermark.getPreview();
+			    }, 1000); 
+		    }
+
+
+	    });
+
+	    // 点击生成水印图
+	    document.getElementById('result-btn').addEventListener('click', function() {
+
+	    	if (!watermark.hasImage()) {
+	    		alert('请先生成预览图（请先调用 setFile 读取控件中的文件）');
+	    		return false;
+	    	}
+
+	    	// 清空之前的水印
+	    	watermark.clearMark();
+
+		    watermark.addText(document.getElementById('text1').value, {
+				fontSize: document.getElementById('size1').value,
+				left: document.getElementById('level1').value || 10,
+				top: document.getElementById('vertical1').value || 10
+			});
+
+			watermark.addText(document.getElementById('text2').value, {
+				fontSize: document.getElementById('size2').value,
+				color: '#000',
+				left: document.getElementById('level2').value || 10,
+				top: document.getElementById('vertical2').value || 10
+			});
+
+		    document.getElementById('result').src = watermark.render(document.getElementById('format').value);
+
+	    });
+	</script>
+</body>
+</html>
