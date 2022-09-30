@@ -61,7 +61,10 @@
 		</div>
 		<div class="water-image" style="width: 25vw;">
 			<div>
-				<p>图片水印base64</p><textarea id="image-base64"></textarea>
+				<p>图片水印base64-1</p><textarea id="image-base64"></textarea>
+			</div>
+			<div>
+				<p>图片水印base64-2</p><textarea id="image-base64-2"></textarea>
 			</div>
 			<div>
 				<p>宽</p><input type="range" id="nwidth" max="300" min="10" step="1" value="50">
@@ -105,7 +108,8 @@
 			image.onload = () => {
 				res(image);
 			}
-			image.src = src;
+
+			image.src = src
 		})
 	}
 
@@ -145,11 +149,14 @@
 		let imageArray = [];
 		Promise.all(
 			Array.from(srcArray).map(async item => {
-				let imageojb = await loadImage(srcArray);
-				imageArray = imageArray.concat(imageojb);
+				if (item != "") {
+					let imageojb = await loadImage(item);
+					imageArray = imageArray.concat(imageojb);
+				}
 			})
 		).then(() => {
-			watermark2.addImage(imageArray, {
+			watermark2.addImage({
+				imageArray: imageArray,
 				width: parseInt(document.querySelector("#nwidth").value),
 				height: parseInt(document.querySelector("#nheight").value),
 				globalAlpha: parseFloat(document.querySelector("#nglobalAlpha").value),
@@ -231,26 +238,44 @@
 	}
 
 	document.querySelector("#image-base64").oninput = () => {
-		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value,
+			document.querySelector("#image-base64-2").value
+		]);
 	}
-
+	document.querySelector("#image-base64-2").oninput = () => {
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value,
+			document.querySelector("#image-base64-2").value
+		]);
+	}
 	document.querySelector("#nwidth").oninput = () => {
-		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value,
+			document.querySelector("#image-base64-2").value
+		]);
 	}
 	document.querySelector("#nheight").oninput = () => {
-		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value,
+			document.querySelector("#image-base64-2").value
+		]);
 	}
 	document.querySelector("#nglobalAlpha").oninput = () => {
-		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value,
+			document.querySelector("#image-base64-2").value
+		]);
 	}
 	document.querySelector("#nrotateAngle").oninput = () => {
-		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value,
+			document.querySelector("#image-base64-2").value
+		]);
 	}
 	document.querySelector("#nxMoveDistance").oninput = () => {
-		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value,
+			document.querySelector("#image-base64-2").value
+		]);
 	}
 	document.querySelector("#nyMoveDistance").oninput = () => {
-		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value,
+			document.querySelector("#image-base64-2").value
+		]);
 	}
 	main();
 </script>
