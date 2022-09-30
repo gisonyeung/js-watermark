@@ -11,7 +11,8 @@ JavaScript 图片文字水印、图片图片水印生成工具，生成 base64 �
 ```JavaScript
 var watermark = new Watermark();
 watermark.setImage(base64String);
-watermark.addText('js-watermark 图片水印', {
+watermark.addText( {
+    text: ['Call By waterMark.addText'],
     fontSize: '5vw',
     left: 10,
     top: 10,
@@ -28,7 +29,7 @@ new Watermark();
 其中：
 * `option`为可选参数，addText和addImage的参数不同，这里解释下全部参数含义，使用的有哪些参数请看源码：
 * `image`Image对象，传入为设置图片水印
-* `text`全局水印文字，在添加水印时若不指定水印文字，则会默认使用全局水印文字，默认值为`Call By waterMark.addText`。
+* `text`全局水印文字，在添加水印时若不指定水印文字，则会默认使用全局水印文字，默认值为`Call By waterMark.addText`，可以有多个文字，随意设置到图片中。
 * `fontSize`全局水印字体大小，单位`px`或`vw`，其中`px`为绝对值，`vw`为相对值，`100vw`等于当前图片宽度，默认值为`6vw`。
 * `fontFamily`全局字体类型，默认值为`Microsoft Yahei`。
 * `color`全局字体颜色，默认值为`#000000`。
