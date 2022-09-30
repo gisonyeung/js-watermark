@@ -1,9 +1,10 @@
 /**
  * @js-watermark.js
- * @author gisonyeung
- * @Created: 17-04-05
- * @repository: https://github.com/gisonyeung/js-watermark..git 
- * @description JavaScript 图片文字水印生成工具，生成 base64 编码图片。
+ * @author WhiteSev
+ * @Created: 22-09-26
+ * @repository: https://github.com/WhiteSevs/js-watermark
+ * @forked by:https://github.com/gisonyeung/js-watermark
+ * @description JavaScript 图片文字水印、图片图片水印生成工具，生成 base64 编码图片。
  */
 
 (function (global, factory) {
@@ -14,195 +15,423 @@
     }
 }(this, function () {
     'use strict';
+    /**	
+     * @author zhangxinxu(.com)	
+     * @licence MIT	
+     * @description http://www.zhangxinxu.com/wordpress/?p=7362	
+     */
+    /* api扩展-设置字符间距 */
+    CanvasRenderingContext2D.prototype.letterSpacingText = function (text, x, y, letterSpacing) {
+        var context = this;
+        var canvas = context.canvas;
 
-    var Watermark = function(options) {
-
-    	var self = this;
-
-    	var defaults = {
-    		fileControlId: '',
-            text: 'js-watermark',
-            fontSize: '3vw',
-            fontFamily: 'Microsoft Yahei',
-            color: 'rgba(255,255,255,0.7)',
-            addPreviewListener: null,
-        };
-
-        options = options || {};
-        for (var key in defaults) {
-            if (typeof options[key] === 'undefined') {
-                options[key] = defaults[key];
-            }
+        if (!letterSpacing && canvas) {
+            letterSpacing = parseFloat(window.getComputedStyle(canvas).letterSpacing);
+        }
+        if (!letterSpacing) {
+            return this.fillText(text, x, y);
         }
 
-        self.options = options;
+        var arrText = text.split('');
+        var align = context.textAlign || 'left';
 
-        // 采用上传按钮的方式获取图片
-        if (options.fileControlId) {
-            if (typeof options.addPreviewListener === 'function') {
-                var $fileControl = document.getElementById(options.fileControlId);
+        /* 这里仅考虑水平排列 */
+        var originWidth = context.measureText(text).width;
+        /* 应用letterSpacing占据宽度 */
+        var actualWidth = originWidth + letterSpacing * (arrText.length - 1);
+        /* 根据水平对齐方式确定第一个字符的坐标	 */
+        if (align == 'center') {
+            x = x - actualWidth / 2;
+        } else if (align == 'right') {
+            x = x - actualWidth;
+        }
 
-                $fileControl.addEventListener('change', function(event) {
-                    getFileBase64(event, function(src) {
-                        self.setImage(src);
-                        options.addPreviewListener.call(self, src, self.sizes);
-                    });
+        /* 临时修改为文本左对齐	 */
+        context.textAlign = 'left';
+        /* 开始逐字绘制	 */
+        arrText.forEach(function (letter) {
+            var letterWidth = context.measureText(letter).width;
+            context.fillText(letter, x, y);
+            /* 确定下一个字符的横坐标	 */
+            x = x + letterWidth + letterSpacing;
+        });
+        /* 对齐方式还原	 */
+        context.textAlign = align;
+    };
 
-                });
-                
+    /* api扩展-自动换行 */
+    CanvasRenderingContext2D.prototype.wrapText = function (text, x, y, maxWidth, lineHeight) {
+        if (typeof text != 'string' || typeof x != 'number' || typeof y != 'number') {
+            return;
+        }
+
+        var context = this;
+        var canvas = context.canvas;
+
+        if (typeof maxWidth == 'undefined') {
+            maxWidth = (canvas && canvas.width) || 300;
+        }
+        if (typeof lineHeight == 'undefined') {
+            lineHeight = (canvas && parseInt(window.getComputedStyle(canvas).lineHeight)) || parseInt(window.getComputedStyle(document.body).lineHeight);
+        }
+
+        /* 字符分隔为数组	 */
+        var arrText = text.split('');
+        var line = '';
+
+        for (var n = 0; n < arrText.length; n++) {
+            var testLine = line + arrText[n];
+            var metrics = context.measureText(testLine);
+            var testWidth = metrics.width;
+            if (testWidth > maxWidth && n > 0) {
+                context.fillText(line, x, y);
+                line = arrText[n];
+                y += lineHeight;
             } else {
-                throw Error('js-watermark: 请绑定获取base64图片信息的回调函数 addPreviewListener')
+                line = testLine;
             }
         }
+        context.fillText(line, x, y);
+    };
 
-        function getFileBase64(source, callback) {
-            if(window.FileReader) {
-                var oFileReader = new FileReader(),
-                    oFile = source.target.files[0];
-                // 过滤非图片文件
-                if (/^image*/.test(oFile.type)) {
-                    oFileReader.onloadend = function(e) {
-                        callback(e.target.result);
-                    };
-                    // 将图片转为base64格式
-                    oFileReader.readAsDataURL(oFile);
-                } else {
-                    alert('请上传图片文件');
-                }
-            } else {
-                alert('您当前使用的浏览器不支持读取文件功能');
-            }
+    /* api扩展-垂直排列 */
+    CanvasRenderingContext2D.prototype.fillTextVertical = function (text, x, y) {
+        var context = this;
+        var canvas = context.canvas;
+
+        var arrText = text.split('');
+        var arrWidth = arrText.map(function (letter) {
+            return context.measureText(letter).width;
+        });
+
+        var align = context.textAlign;
+        var baseline = context.textBaseline;
+
+        if (align == 'left') {
+            x = x + Math.max.apply(null, arrWidth) / 2;
+        } else if (align == 'right') {
+            x = x - Math.max.apply(null, arrWidth) / 2;
         }
-        
-    } 
-
-    // 通过 file 控件载入图片文件
-    Watermark.prototype.setFile = function(fileId) {
-        if(window.FileReader) {
-            var self = this;
-            var source = document.getElementById(fileId);
-            var oFileReader = new FileReader();
-
-            if (source.files.length === 0) {
-                alert('文件为空')
-                return false;
-            }
-
-            var oFile = source.files[0];
-            // 过滤非图片文件
-            if (/^image*/.test(oFile.type)) {
-                oFileReader.onloadend = function(e) {
-                    self.setImage(e.target.result);
-                };
-                // 将图片转为base64格式
-                oFileReader.readAsDataURL(oFile);
-                return true;
-            } else {
-                alert('请上传图片文件');
-                return false;
-            }
-        } else {
-            alert('您当前使用的浏览器不支持读取文件功能');
+        if (baseline == 'bottom' || baseline == 'alphabetic' || baseline == 'ideographic') {
+            y = y - arrWidth[0] / 2;
+        } else if (baseline == 'top' || baseline == 'hanging') {
+            y = y + arrWidth[0] / 2;
         }
+
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+
+        /* 开始逐字绘制 */
+        arrText.forEach(function (letter, index) {
+            /* 确定下一个字符的纵坐标位置 */
+            var letterWidth = arrWidth[index];
+            /* 是否需要旋转判断 */
+            var code = letter.charCodeAt(0);
+            if (code <= 256) {
+                context.translate(x, y);
+                /* 英文字符，旋转90° */
+                context.rotate(90 * Math.PI / 180);
+                context.translate(-x, -y);
+            } else if (index > 0 && text.charCodeAt(index - 1) < 256) {
+                /* y修正 */
+                y = y + arrWidth[index - 1] / 2;
+            }
+            context.fillText(letter, x, y);
+            /* 旋转坐标系还原成初始态 */
+            context.setTransform(1, 0, 0, 1, 0, 0);
+            /* 确定下一个字符的纵坐标位置 */
+            var letterWidth = arrWidth[index];
+            y = y + letterWidth;
+        });
+        /* 水平垂直对齐方式还原 */
+        context.textAlign = align;
+        context.textBaseline = baseline;
+    };
+
+    /* 加载file对象 */
+    function loadFile(file) {
+        let fileReader = new FileReader();
+        return new Promise(res => {
+            fileReader.onloadend = async function (e) {
+                res(e);
+            };
+            fileReader.readAsDataURL(file);
+        })
+    }
+    /* 加载Image对象 */
+    function loadImage(src) {
+        let image = new Image();
+
+        return new Promise(res => {
+            image.onload = () => {
+                res(image);
+            };
+            image.src = src;
+        })
+    }
+    /* 获取文字占据的宽度，高度 */
+    function getCharSizeByCanvas(char, style = {}) {
+        let textCanvas = document.createElement('canvas');
+        textCanvas.style.positon = "ablsolute";
+        let textCTX = textCanvas.getContext('2d');
+        let {
+            fontSize = 14,
+                fontFamily = "Microsoft Yahei"
+        } = style
+        document.body.appendChild(textCanvas)
+        textCTX.font = `${fontSize}px ${fontFamily}`
+        document.body.removeChild(textCanvas)
+        let text = textCTX.measureText(char) /* TextMetrics object */
+        textCTX.fillText(char, 50, 50)
+        let result = {
+            height: parseInt(fontSize),
+            width: parseInt(text.width)
+        }
+        return result
     }
 
-    // 通过 base64 载入图片文件
-    Watermark.prototype.setImage = function(src) {
-        var image = new Image();
-        image.src = src;
+    var Watermark = function (options) {};
+
+    /* 通过 file 对象载入图片文件 */
+    Watermark.prototype.setFile = function (file) {
+        let self = this;
+        async function _setFile_(file) {
+            var fileReader = await loadFile(file);
+            await self.setImage(fileReader.target.result);
+        }
+        _setFile_(file);
+    }
+
+    /* 通过 base64 载入图片文件 */
+    Watermark.prototype.setImage = function (src) {
         this.dataUrl = src;
-        this.sizes = {
-            width: image.width,
-            height: image.height
-        };
+        let self = this;
+        async function _setImage_(src) {
+            var image = await loadImage(src);
+            self.sizes = {
+                width: image.width,
+                height: image.height
+            };
 
-        var canvas = document.createElement('canvas');
+            var canvas = document.createElement('canvas');
 
-        canvas.width = this.sizes.width;
-        canvas.height = this.sizes.height;
-        var ctx = canvas.getContext('2d');
+            canvas.width = self.sizes.width;
+            canvas.height = self.sizes.height;
+            var ctx = canvas.getContext('2d');
 
-        ctx.drawImage(image, 0, 0);
-        image = null;
-
-        this.canvas = canvas;
+            ctx.drawImage(image, 0, 0);
+            image = null;
+            self.canvas = canvas;
+        }
+        _setImage_(src);
     }
 
-    Watermark.prototype.hasImage = function() {
+    /* 获取是否存在图片对象 */
+    Watermark.prototype.hasImage = function () {
         return !!this.dataUrl;
     }
 
-    // 获取当前图片尺寸
-    Watermark.prototype.getSize = function() {
+    /* 获取当前图片尺寸 */
+    Watermark.prototype.getSize = function () {
         return this.sizes;
     }
 
-    // 清空水印
+    /* 清空水印 */
     Watermark.prototype.clearMark = function () {
-        var ctx = this.canvas.getContext('2d');
-        // 清空画布
-        ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
-        // 重绘
+        let self = this;
 
-        var image = new Image();
-        image.src = this.dataUrl;
-        ctx.drawImage(image, 0, 0);
-        image = null;
+        function _clearMark_() {
+            var ctx = self.canvas.getContext('2d');
+            /* 清空画布 */
+            ctx.clearRect(0, 0, self.canvas.width, self.canvas.height);
+            var w = self.canvas.width;
+            var h = self.canvas.height;
+            self.canvas.width = w;
+            self.canvas.height = h;
+            /* 清除path路径 */
+            ctx.beginPath();
+            /* 重绘 */
+            var image = new Image();
+            image.src = self.dataUrl;
+            ctx.drawImage(image, 0, 0);
+            image = null;
+
+        }
+        _clearMark_();
     }
 
-    // 增加文字水印
-    Watermark.prototype.addText = function(text, opts) {
-        /*
-            opt: {
-                fontSize: '20px',
-                fontFamily: 'Microsoft Yahei',
-                color: "rgba(255,255,255, 0.7)",
-                left: 0,
-                top: 0,
+    /* 增加文字水印(全屏) */
+    Watermark.prototype.addText = function (text, opts) {
+        var options = {
+            text: 'Call By waterMark.addText',
+            fontSize: '6vw',
+            fontFamily: 'Microsoft Yahei',
+            color: "#000000",
+            textAlign: "center",
+            globalAlpha: 0.7,
+            rotateAngle: 50,
+            maxWidth: 100,
+            xMoveDistance: 30,
+            yMoveDistance: 30,
+            addPreviewListener: null,
+        };
+        for (let key in options) {
+            if (typeof opts[key] !== "undefined") {
+                options[key] = opts[key];
             }
-        */
+        }
         if (typeof text === 'object') {
             opts = text;
-            text = this.options.text;
-        }
-
-        if (opts.left == null) {
-            alert('请设置文字水印水平距离');
-            return false;
-        }
-        if (opts.top == null) {
-            alert('请设置文字水印垂直距离');
-            return false;
+            text = options.text;
         }
 
         var ctx = this.canvas.getContext('2d');
 
-        var _fontSize = opts.fontSize || this.options.fontSize;
-
-        // 转换 vw
-        if (~_fontSize.indexOf('vw')) {
-            _fontSize = this.sizes.width / 100 * _fontSize.replace('vw', '');
-             // 保留三位小数
-            _fontSize = _fontSize.toFixed(3) + 'px';
+        var fontSize = options.fontSize;
+        fontSize = fontSize.toString();
+        /* 转换 vw */
+        if (~fontSize.indexOf('vw')) {
+            fontSize = (this.sizes.width / 100 * parseInt(fontSize)).toFixed(0);
         }
+        fontSize = parseInt(fontSize);
 
-        // 绘制水印
-        ctx.font= _fontSize + " " + (opts.fontFamily || this.options.fontFamily);
-        ctx.fillStyle = opts.color || this.options.color;
-        ctx.fillText(text, opts.left, opts.top);
+        /* 绘制水印 */
+        ctx.font = fontSize + "px " + options.fontFamily;
+        ctx.fillStyle = options.color;
+        ctx.textAlign = options.textAlign;
+        ctx.globalAlpha = options.globalAlpha; /* 透明度 */
+
+
+        let canvasWidth = this.sizes.width,
+            /* 画布宽高 */
+            canvasHeight = this.sizes.height;
+        let rotateAngle = options.rotateAngle * Math.PI / 180;
+        let xMoveDistance = options.xMoveDistance; /* 水平移动距离 */
+        let yMoveDistance = options.yMoveDistance; /* 垂直移动距离 */
+        let maxWidth = options.maxWidth; /* 文字最大宽度 */
+        let lineHeight = fontSize; /* 文字占据高度 */
+
+        for (let i = canvasWidth / 2; i < canvasWidth; i += xMoveDistance) {
+            /* 右侧铺满 */
+            for (let j = canvasHeight / 2; j < canvasHeight; j += yMoveDistance) {
+                /* 右下 */
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.translate(i, j);
+                ctx.rotate(rotateAngle);
+                ctx.wrapText(text, 0, 0, maxWidth, lineHeight);
+
+            }
+            for (let k = canvasHeight / 2; k > 0; k -= yMoveDistance) {
+                /* 右上 */
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.translate(i, k);
+                ctx.rotate(rotateAngle);
+                ctx.wrapText(text, 0, 0, maxWidth, lineHeight);
+            }
+        }
+        for (let i = canvasWidth / 2; i > 0; i -= xMoveDistance) {
+            /* 左侧铺满 */
+            for (let j = canvasHeight / 2; j < canvasHeight; j += yMoveDistance) {
+                /* 左下 */
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.translate(i, j);
+                ctx.rotate(rotateAngle);
+                ctx.wrapText(text, 0, 0, maxWidth, lineHeight);
+
+            }
+            for (let k = canvasHeight / 2; k > 0; k -= yMoveDistance) {
+                /* 左上 */
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.translate(i, k);
+                ctx.rotate(rotateAngle);
+                ctx.wrapText(text, 0, 0, maxWidth, lineHeight);
+            }
+        }
 
     }
 
-    Watermark.prototype.getPreview = function() {
+    /* 添加图片水印(全屏) */
+    Watermark.prototype.addImage = function (image, opts) {
+        if (image == null) {
+            alert("参数缺少需要水印的Image对象");
+            return false;
+        }
+        let options = {
+            width: 50,
+            height: 50,
+            globalAlpha: 0.5,
+            xMoveDistance: 70,
+            yMoveDistance: 70,
+            rotateAngle: 0,
+        }
+        for (let key in options) {
+            if (typeof opts[key] !== "undefined") {
+                options[key] = opts[key];
+            }
+        }
+        var ctx = this.canvas.getContext('2d');
+        var waterImageCanvas = document.createElement("canvas");
+        var waterImageCanvasDiagonal = parseInt(Math.sqrt(options.width * options.width + options.height * options.height)); /* 水印对角线 */
+        waterImageCanvas.width = waterImageCanvasDiagonal;
+        waterImageCanvas.height = waterImageCanvasDiagonal;
+        var waterctx = waterImageCanvas.getContext("2d");
+        waterctx.globalAlpha = options.globalAlpha; /* 透明度 */
+
+
+        let canvasWidth = this.sizes.width,
+            /* 画布宽高 */
+            canvasHeight = this.sizes.height;
+
+        let rotateAngle = options.rotateAngle * Math.PI / 180; /* 旋转角度 */
+        let xMoveDistance = options.xMoveDistance; /* 水平移动距离 */
+        let yMoveDistance = options.yMoveDistance; /* 垂直移动距离 */
+        let centerDrawLeftPosX = canvasWidth / 2 - waterImageCanvas.width / 2; /* 中心的绘制水印的左上角坐标x */
+        let centerDrawLeftPosY = canvasHeight / 2 - waterImageCanvas.height / 2; /* 绘制水印的左上角坐标y */
+        let waterDrawPosX = (waterImageCanvasDiagonal - options.width) / 2; /* 水印里图片坐标x */
+        let waterDrawPosY = (waterImageCanvasDiagonal - options.height) / 2; /* 水印里图片坐标y */
+
+        waterctx.translate(waterImageCanvasDiagonal / 2, waterImageCanvasDiagonal / 2);
+        waterctx.rotate(rotateAngle);
+        waterctx.translate(-waterImageCanvasDiagonal / 2, -waterImageCanvasDiagonal / 2);
+        waterctx.drawImage(image, waterDrawPosX, waterDrawPosY, options.width, options.height);
+
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        for (let i = centerDrawLeftPosX; i < canvasWidth; i += xMoveDistance) {
+            /* 右侧铺满 */
+            for (let j = centerDrawLeftPosY; j < canvasHeight; j += yMoveDistance) {
+                /* 右下 */
+                ctx.drawImage(waterImageCanvas, i, j); /* 绘制水印 */
+
+            }
+            for (let k = centerDrawLeftPosY; k > -Math.abs(waterImageCanvasDiagonal); k -= yMoveDistance) {
+                /* 右上 */
+                ctx.drawImage(waterImageCanvas, i, k);
+            }
+        }
+        for (let i = centerDrawLeftPosX; i > -Math.abs(waterImageCanvasDiagonal); i -= xMoveDistance) {
+            /* 左侧铺满 */
+            for (let j = centerDrawLeftPosY; j < canvasHeight; j += yMoveDistance) {
+                /* 左下 */
+                ctx.drawImage(waterImageCanvas, i, j);
+
+            }
+            for (let k = centerDrawLeftPosY; k > -Math.abs(waterImageCanvasDiagonal); k -= yMoveDistance) {
+                /* 左上 */
+                ctx.drawImage(waterImageCanvas, i, k);
+            }
+        }
+
+    }
+    /* 获得原图 */
+    Watermark.prototype.getPreview = function () {
         return this.dataUrl;
     }
 
-    // 绘制图片
-    Watermark.prototype.render = function(type) {
+    /* 绘制图片 */
+    Watermark.prototype.render = function (type) {
         type = type === 'png' ? 'png' : 'jpeg';
         return this.canvas.toDataURL("image/" + type);
     };
 
     return Watermark;
 }));
-
