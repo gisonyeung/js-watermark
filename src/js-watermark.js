@@ -282,7 +282,7 @@
             color: "#000000",
             textAlign: "center",
             globalAlpha: 0.7,
-            rotateAngle: 50,
+            rotateAngle: 50, /* -360 ~ 360 */
             maxWidth: 100,
             xMoveDistance: 30,
             yMoveDistance: 30
@@ -292,7 +292,6 @@
                 options[key] = opts[key];
             }
         }
-        this.clearMark();
         var ctx = this.canvas.getContext('2d');
 
         var fontSize = options.fontSize;
@@ -397,7 +396,7 @@
                 options[key] = opts[key];
             }
         }
-        this.clearMark();
+
         let ctx = this.canvas.getContext('2d');
 
         let waterImageCanvasArray = [];
