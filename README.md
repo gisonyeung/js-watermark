@@ -29,7 +29,7 @@ new Watermark();
 其中：
 * `option`为可选参数，addText和addImage的参数不同，这里解释下全部参数含义，使用的有哪些参数请看源码：
 * `image`Image对象，传入为设置图片水印
-* `text`全局水印文字，在添加水印时若不指定水印文字，则会默认使用全局水印文字，默认值为`Call By waterMark.addText`，可以有多个文字，随意设置到图片中。
+* `text`全局水印文字，在添加水印时若不指定水印文字，则会默认使用全局水印文字，默认值为`Call By waterMark.addText`，可以有多个文字，随机设置到图片中。
 * `fontSize`全局水印字体大小，单位`px`或`vw`，其中`px`为绝对值，`vw`为相对值，`100vw`等于当前图片宽度，默认值为`6vw`。
 * `fontFamily`全局字体类型，默认值为`Microsoft Yahei`。
 * `color`全局字体颜色，默认值为`#000000`。
@@ -72,15 +72,14 @@ new Watermark();
 ```
 返回原图。
 
-## .addText([text,]opts)
+## .addText(opts)
 ```
-@param text {String} 水印文字，可选，不填写默认使用全局配置
 @param opts {Object} 水印文字样式配置
 ```
 
-## .addImage([image,]opts)
+## .addImage([imageArray,]opts)
 ```
-@param image {Object} 水印图片，必选
+@param imageArray {Array} 水印图片数组，里面是Image对象，必选，可以有多个图片
 @param opts {Object} 水印文字样式配置
 ```
 
@@ -97,7 +96,5 @@ new Watermark();
 # 在线预览
 
 方式1 - 传入 file 对象，通过主动调用实例方法生成水印图：[在线demo](https://WhiteSevs.github.io/js-watermark/demo/example1.html)
-
-方式2 - 传入 base64 编码的图片，通过主动调用实例方法生成水印图：[在线demo](https://WhiteSevs.github.io/js-watermark/demo/example2.html)
 
 
