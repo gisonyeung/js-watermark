@@ -1,82 +1,258 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>js-watermark</title>
+	<script src="../src/js-watermark.js"></script>
 	<style>
-		* {
-			font-family: Microsoft Yahei; 
+		.water-text div,
+		.water-image div {
+			margin: 10px 0;
+			display: flex;
+			align-items: center;
 		}
-		img {
-			max-width: 100%;
+
+		.water-text p,
+		.water-image p {
+			width: 100px;
 		}
 	</style>
 </head>
+
 <body>
-	<h2>方式1 - 监听文件改变，自动触发回调</h2>
-	<div>
-		<div>
-			<label for="test1">水印文字1</label>
-			<input type="text" id="text1" value="js-watermark 水印文字">
-			<label for="size1">大小</label>
-			<input type="text" id="size1" value="4vw" placeholder="单位px或vw，100vw等于当前图片宽度">
-			<label for="level1">水平距离</label>
-			<input type="text" id="level1" placeholder="数字" value="100">
-			<label for="vertical1">垂直距离</label>
-			<input type="text" id="vertical1" placeholder="数字，图片顶部到字体基线的距离" value="100">
+	<h2>方式1 - 传入 file 对象，通过主动调用实例方法生成水印图</h2>
+	<div style="display: flex;">
+		<div class="water-text" style="width: 25vw;">
+			<div>
+				<p>上传文件</p><input type="file" id="uploadFile">
+			</div>
+			<div>
+				<p>文字</p><input type="text" id="mtext" placeholder="文字" value="测试水印文字,js-watermark" disabled="true">
+			</div>
+			<div>
+				<p>大小px</p><input type="range" id="msize" max="300" min="1" step="1" value="16" disabled="true">
+			</div>
+			<div>
+				<p>颜色</p><input type="color" id="mcolor" disabled="true">
+			</div>
+			<div>
+				<p>字体</p><input type="text" id="mfontfamily" placeholder="字体" value="Microsoft Yahei" disabled="true">
+			</div>
+			<div>
+				<p>透明度</p><input type="range" id="mglobalAlpha" max="1" min="0" step="0.01" value="0.7" disabled="true">
+			</div>
+			<div>
+				<p>旋转角度</p><input type="range" id="mrotateAngle" max="360" min="-360" step="1" value="45" disabled="true">
+			</div>
+			<div>
+				<p>最大宽度</p><input type="range" id="mmaxWidth" max="300" min="1" step="1" value="100" disabled="true">
+			</div>
+			<div>
+				<p>上下间距</p><input type="range" id="myMoveDistance" max="300" min="1" step="1" value="30" disabled="true">
+			</div>
+			<div>
+				<p>左右间距</p><input type="range" id="mxMoveDistance" max="300" min="1" step="1" value="30" disabled="true">
+			</div>
+
+
 		</div>
-		<div>
-			<label for="test2">水印文字2</label>
-			<input type="text" id="text2"> 
-			<label for="size2">大小</label>
-			<input type="text" id="size2" placeholder="单位px或vw，100vw等于当前图片宽度">
-			<label for="level2">水平距离</label>
-			<input type="text" id="level2" placeholder="数字">
-			<label for="vertical2">垂直距离</label>
-			<input type="text" id="vertical2" placeholder="数字，图片顶部到字体基线的距离">
+		<div class="water-image" style="width: 25vw;">
+			<div>
+				<p>图片水印base64</p><textarea id="image-base64"></textarea>
+			</div>
+			<div>
+				<p>宽</p><input type="range" id="nwidth" max="300" min="10" step="1" value="50">
+			</div>
+			<div>
+				<p>高</p><input type="range" id="nheight" max="300" min="10" step="1" value="50">
+			</div>
+			<div>
+				<p>透明度</p><input type="range" id="nglobalAlpha" max="1" min="0" step="0.1" value="0.6">
+			</div>
+			<div>
+				<p>旋转角度</p><input type="range" id="nrotateAngle" max="360" min="-360" step="1" value="45">
+			</div>
+			<div>
+				<p>上下间距</p><input type="range" id="nxMoveDistance" max="300" min="10" step="1" value="50">
+			</div>
+			<div>
+				<p>左右间距</p><input type="range" id="nyMoveDistance" max="300" min="10" step="1" value="50">
+			</div>
 		</div>
-		<label for="format">图片格式</label>
-		<select id="format">
-			<option value="jpeg" selected>jpeg</option>
-			<option value="png">png</option>
-		</select>
+		<div style="width: 50vw;display: flex;">
+			<div style="width: 16vw;">
+				<h3>原图：</h3>
+				<img id="imgY" style="width: 100%;" src="">
+			</div>
+			<div style="width: 16vw;">
+				<h3>水印文字：</h3>
+				<img id="imgT" style="width: 100%;" src="">
+			</div>
+			<div style="width: 16vw;">
+				<h3>水印图片</h3>
+				<img id="imgI" style="width: 100%;" src="">
+			</div>
+		</div>
 	</div>
-	<div>
-		<input type="file" id="file">
-	</div>
-	<div>
-		<h3>原图：</h3>
-		<img src="" id="preview">
-	</div>
-	<div>
-		<h3>水印图</h3>
-		<img src="" id="result">
-	</div>
-	<script src="../src/js-watermark.js"></script>
-	<script>
-		new Watermark({
-			fileControlId: 'file',
-			fontSize: '30px',
-			addPreviewListener: function(src, sizes) {
-				document.getElementById('preview').src = src;
-
-				this.addText(document.getElementById('text1').value, {
-					fontSize: document.getElementById('size1').value,
-					left: document.getElementById('level1').value || 10,
-					top: document.getElementById('vertical1').value || 10
-				});
-
-				this.addText(document.getElementById('text2').value, {
-					fontSize: document.getElementById('size2').value,
-					color: '#000',
-					left: document.getElementById('level2').value || 10,
-					top: document.getElementById('vertical2').value || 10
-				});
-
-				document.getElementById('result').src = this.render(document.getElementById('format').value);
-
-			},
-		})
-	</script>
 </body>
+<script>
+	function loadImage(src) {
+		let image = new Image();
+		return new Promise(res => {
+			image.onload = () => {
+				res(image);
+			}
+			image.src = src;
+		})
+	}
+
+	function loadFile(file) {
+		let fileReader = new FileReader();
+		return new Promise(res => {
+			fileReader.onloadend = async function (e) {
+				res(fileReader);
+			}
+			fileReader.readAsDataURL(file);
+		})
+	}
+	var watermark = new Watermark();
+	var watermark2 = new Watermark();
+
+	async function changeImage(file) {
+		await watermark.setFile(file);
+		watermark.addText({
+			text: document.querySelector("#mtext").value.split(","),
+			fontSize: document.querySelector("#msize").value,
+			fontFamily: document.querySelector("#mfontfamily").value,
+			color: document.querySelector("#mcolor").value,
+			textAlign: "center",
+			globalAlpha: parseFloat(document.querySelector("#mglobalAlpha").value),
+			rotateAngle: parseInt(document.querySelector("#mrotateAngle").value),
+			maxWidth: parseInt(document.querySelector("#mmaxWidth").value),
+			xMoveDistance: parseInt(document.querySelector("#mxMoveDistance").value),
+			yMoveDistance: parseInt(document.querySelector("#myMoveDistance").value)
+		});
+		document.querySelector("#imgT").src = watermark.render("png");
+
+
+	}
+
+	async function changeImage2(file, srcArray) {
+		await watermark2.setFile(file);
+		let imageArray = [];
+		Promise.all(
+			Array.from(srcArray).map(async item => {
+				let imageojb = await loadImage(srcArray);
+				imageArray = imageArray.concat(imageojb);
+			})
+		).then(() => {
+			watermark2.addImage(imageArray, {
+				width: parseInt(document.querySelector("#nwidth").value),
+				height: parseInt(document.querySelector("#nheight").value),
+				globalAlpha: parseFloat(document.querySelector("#nglobalAlpha").value),
+				rotateAngle: parseInt(document.querySelector("#nrotateAngle").value),
+				xMoveDistance: parseInt(document.querySelector("#nxMoveDistance").value),
+				yMoveDistance: parseInt(document.querySelector("#nyMoveDistance").value)
+			});
+			document.querySelector("#imgI").src = watermark2.render("png");
+		})
+
+	}
+
+	function setDisabled() {
+		document.querySelectorAll("input").forEach(item => {
+			item.setAttribute("disabled", true)
+		})
+		document.querySelectorAll("textarea").forEach(item => {
+			item.setAttribute("disabled", true)
+		})
+	}
+
+	function removeDisabled() {
+		document.querySelectorAll("input").forEach(item => {
+			item.removeAttribute("disabled")
+		})
+		document.querySelectorAll("textarea").forEach(item => {
+			item.removeAttribute("disabled")
+		})
+	}
+
+	function asyncFileToBase64(file) {
+		let reader = new FileReader();
+		reader.readAsDataURL(file);
+		return new Promise(res => {
+			reader.onload = function (e) {
+				res(e.target.result);
+			}
+		})
+
+	}
+	setDisabled();
+	document.querySelector("#uploadFile").removeAttribute("disabled");
+	async function main() {
+		document.querySelector("#uploadFile").addEventListener("change", (e) => {
+			removeDisabled();
+			asyncFileToBase64(e.target.files[0]).then(base64 => {
+				document.querySelector("#imgY").src = base64;
+			})
+			changeImage(e.target.files[0]);
+		})
+	}
+
+	document.querySelector("#mtext").oninput = () => {
+		changeImage(document.querySelector("#uploadFile").files[0]);
+	}
+	document.querySelector("#msize").oninput = () => {
+		changeImage(document.querySelector("#uploadFile").files[0]);
+	}
+	document.querySelector("#mfontfamily").oninput = () => {
+		changeImage(document.querySelector("#uploadFile").files[0]);
+	}
+	document.querySelector("#mcolor").oninput = () => {
+		changeImage(document.querySelector("#uploadFile").files[0]);
+	}
+	document.querySelector("#mglobalAlpha").oninput = () => {
+		changeImage(document.querySelector("#uploadFile").files[0]);
+	}
+	document.querySelector("#mrotateAngle").oninput = () => {
+		changeImage(document.querySelector("#uploadFile").files[0]);
+	}
+	document.querySelector("#mmaxWidth").oninput = () => {
+		changeImage(document.querySelector("#uploadFile").files[0]);
+	}
+	document.querySelector("#myMoveDistance").oninput = () => {
+		changeImage(document.querySelector("#uploadFile").files[0]);
+	}
+	document.querySelector("#mxMoveDistance").oninput = () => {
+		changeImage(document.querySelector("#uploadFile").files[0]);
+	}
+
+	document.querySelector("#image-base64").oninput = () => {
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+	}
+
+	document.querySelector("#nwidth").oninput = () => {
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+	}
+	document.querySelector("#nheight").oninput = () => {
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+	}
+	document.querySelector("#nglobalAlpha").oninput = () => {
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+	}
+	document.querySelector("#nrotateAngle").oninput = () => {
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+	}
+	document.querySelector("#nxMoveDistance").oninput = () => {
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+	}
+	document.querySelector("#nyMoveDistance").oninput = () => {
+		changeImage2(document.querySelector("#uploadFile").files[0], [document.querySelector("#image-base64").value]);
+	}
+	main();
+</script>
+
 </html>
