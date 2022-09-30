@@ -127,6 +127,7 @@
 
 	async function changeImage(file) {
 		await watermark.setFile(file);
+		watermark.clearMark();
 		watermark.addText({
 			text: document.querySelector("#mtext").value.split(","),
 			fontSize: document.querySelector("#msize").value,
@@ -155,6 +156,7 @@
 				}
 			})
 		).then(() => {
+			watermark.clearMark();
 			watermark2.addImage({
 				imageArray: imageArray,
 				width: parseInt(document.querySelector("#nwidth").value),
