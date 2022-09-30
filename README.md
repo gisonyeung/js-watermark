@@ -27,17 +27,17 @@ new Watermark();
 
 其中：
 * `option`为可选参数，addText和addImage的参数不同，这里解释下全部参数含义，使用的有哪些参数请看源码：
-  * `image`Image对象，传入为设置图片水印
-  * `text`全局水印文字，在添加水印时若不指定水印文字，则会默认使用全局水印文字，默认值为`Call By waterMark.addText`。
-  * `fontSize`全局水印字体大小，单位`px`或`vw`，其中`px`为绝对值，`vw`为相对值，`100vw`等于当前图片宽度，默认值为`6vw`。
-  * `fontFamily`全局字体类型，默认值为`Microsoft Yahei`。
-  * `color`全局字体颜色，默认值为`#000000`。
-  * `textAlign`文字对齐方式, 参数有`left`|`center`|`right`，默认值`center`
-  * `globalAlpha` 透明度，取值范围 0.00 ~ 1.00，默认值`0.7`
-  * `rotateAngle` 旋转角度，取值范围 -360 ~ 360，默认值`50`
-  * `maxWidth` 文字最大宽度，超过宽度会换行，默认值`100`
-  * `xMoveDistance` 每个文字的左右间距，取值范围 不限，默认值`30`，最好是文字宽度+设置的距离
-  * `yMoveDistance` 每个文字的上下间距，取值范围 不限，默认值`30`，最好是文字高度+设置的距离
+* `image`Image对象，传入为设置图片水印
+* `text`全局水印文字，在添加水印时若不指定水印文字，则会默认使用全局水印文字，默认值为`Call By waterMark.addText`。
+* `fontSize`全局水印字体大小，单位`px`或`vw`，其中`px`为绝对值，`vw`为相对值，`100vw`等于当前图片宽度，默认值为`6vw`。
+* `fontFamily`全局字体类型，默认值为`Microsoft Yahei`。
+* `color`全局字体颜色，默认值为`#000000`。
+* `textAlign`文字对齐方式, 参数有`left`|`center`|`right`，默认值`center`
+* `globalAlpha` 透明度，取值范围 0.00 ~ 1.00，默认值`0.7`
+* `rotateAngle` 旋转角度，取值范围 -360 ~ 360，默认值`50`
+* `maxWidth` 文字最大宽度，超过宽度会换行，默认值`100`
+* `xMoveDistance` 每个文字的左右间距，取值范围 不限，默认值`30`，最好是文字宽度+设置的距离
+* `yMoveDistance` 每个文字的上下间距，取值范围 不限，默认值`30`，最好是文字高度+设置的距离
   
 # 实例方法
 ## .setFile(file)
