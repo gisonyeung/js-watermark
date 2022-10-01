@@ -170,10 +170,10 @@
         })
     }
     /* 检查坐标是否重复 */
-    function checkInArrayByPos(arrayData,x,y){
+    function checkInArrayByPos(arrayData, x, y) {
         let flag = false;
-        Array.from(arrayData).forEach( item=>{
-            if(item["x"] == x && item["y"] == y){
+        Array.from(arrayData).forEach(item => {
+            if (item["x"] == x && item["y"] == y) {
                 flag = true;
                 return
             }
@@ -206,7 +206,7 @@
     /* 通过 file 对象载入图片文件-异步 */
     Watermark.prototype.setFile = function (file) {
         let self = this;
-        return new Promise( async res=>{
+        return new Promise(async res => {
             var fileReader = await loadFile(file);
             await self.setImage(fileReader.target.result);
             res(true);
@@ -217,7 +217,7 @@
     Watermark.prototype.setImage = function (src) {
         this.dataUrl = src;
         let self = this;
-        return new Promise( async res=>{
+        return new Promise(async res => {
             var image = await loadImage(src);
             self.sizes = {
                 width: image.width,
@@ -250,9 +250,10 @@
     /* 清空水印 */
     Watermark.prototype.clearMark = function () {
         let self = this;
-        if(typeof self.canvas==="undefined"){
+        if (typeof self.canvas === "undefined") {
             return
         }
+
         function _clearMark_() {
             var ctx = self.canvas.getContext('2d');
             /* 清空画布 */
@@ -282,16 +283,20 @@
             color: "#000000",
             textAlign: "center",
             globalAlpha: 0.7,
-            rotateAngle: 50, /* -360 ~ 360 */
-            maxWidth: 100,
-            xMoveDistance: 30,
-            yMoveDistance: 30
+            rotateAngle: 50,
+            /* -360 ~ 360 */
+            maxWidth: 100,/* 必须大于0 */
+            xMoveDistance: 30,/* 必须大于0 */
+            yMoveDistance: 30/* 必须大于0 */
         };
         for (let key in options) {
             if (typeof opts[key] !== "undefined") {
                 options[key] = opts[key];
             }
         }
+        options.maxWidth = parseInt(options.maxWidth) > 0 ? options.maxWidth: 1;
+        options.xMoveDistance = parseInt(options.xMoveDistance) > 0 ? options.xMoveDistance: 1;
+        options.yMoveDistance = parseInt(options.yMoveDistance) > 0 ? options.yMoveDistance: 1;
         var ctx = this.canvas.getContext('2d');
 
         var fontSize = options.fontSize;
@@ -318,49 +323,61 @@
         let maxWidth = options.maxWidth; /* 文字最大宽度 */
         let lineHeight = fontSize; /* 文字占据高度 */
         let pos = [];
-        for (var i= canvasWidth / 2 ; i < canvasWidth; i += xMoveDistance) {
+        for (var i = canvasWidth / 2; i < canvasWidth; i += xMoveDistance) {
             /* 右侧铺满 */
-            for (var j= canvasHeight / 2 ; j < canvasHeight; j += yMoveDistance) {
+            for (var j = canvasHeight / 2; j < canvasHeight; j += yMoveDistance) {
                 /* 右下 */
-                if(!checkInArrayByPos(pos,i,j)){
-                    pos = pos.concat({"x":i,"y":j});
+                if (!checkInArrayByPos(pos, i, j)) {
+                    pos = pos.concat({
+                        "x": i,
+                        "y": j
+                    });
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
                     ctx.translate(i, j);
                     ctx.rotate(rotateAngle);
                     ctx.wrapText(options.text[Math.floor(Math.random() * options.text.length)], 0, 0, maxWidth, lineHeight);
                 }
-                
+
             }
-            for (var k= canvasHeight / 2; k > 0; k -= yMoveDistance) {
+            for (var k = canvasHeight / 2; k > 0; k -= yMoveDistance) {
                 /* 右上 */
-                if(!checkInArrayByPos(pos,i,k)){
-                    pos = pos.concat({"x":i,"y":k});
+                if (!checkInArrayByPos(pos, i, k)) {
+                    pos = pos.concat({
+                        "x": i,
+                        "y": k
+                    });
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
                     ctx.translate(i, k);
                     ctx.rotate(rotateAngle);
                     ctx.wrapText(options.text[Math.floor(Math.random() * options.text.length)], 0, 0, maxWidth, lineHeight);
                 }
-                
+
             }
         }
-        
+
         for (var i = canvasWidth / 2; i > 0; i -= xMoveDistance) {
             /* 左侧铺满 */
             for (var j = canvasHeight / 2; j < canvasHeight; j += yMoveDistance) {
                 /* 左下 */
-                if(!checkInArrayByPos(pos,i,j)){
-                    pos = pos.concat({"x":i,"y":j});
+                if (!checkInArrayByPos(pos, i, j)) {
+                    pos = pos.concat({
+                        "x": i,
+                        "y": j
+                    });
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
                     ctx.translate(i, j);
                     ctx.rotate(rotateAngle);
                     ctx.wrapText(options.text[Math.floor(Math.random() * options.text.length)], 0, 0, maxWidth, lineHeight);
                 }
-                
+
             }
             for (var k = canvasHeight / 2; k > 0; k -= yMoveDistance) {
                 /* 左上 */
-                if(!checkInArrayByPos(pos,i,k)){
-                    pos = pos.concat({"x":i,"y":k});
+                if (!checkInArrayByPos(pos, i, k)) {
+                    pos = pos.concat({
+                        "x": i,
+                        "y": k
+                    });
                     ctx.setTransform(1, 0, 0, 1, 0, 0);
                     ctx.translate(i, k);
                     ctx.rotate(rotateAngle);
@@ -373,30 +390,34 @@
 
     /* 添加图片水印(全屏) */
     Watermark.prototype.addImage = function (opts) {
-        if ( opts.imageArray == null ) {
+        if (opts.imageArray == null) {
             alert("参数缺少imageArray");
             return false;
         }
-        if ( opts.imageArray.length  === 0 ) {
+        if (opts.imageArray.length === 0) {
             alert("参数imageArray不能为空");
             return false;
         }
         let options = {
-            imageArray:[], /* 里面为水印Image对象 */
-            width: 50,
-            height: 50,
+            imageArray: [],
+            /* 里面为水印Image对象 */
+            width: 50, /* 必须大于0 */
+            height: 50,/* 必须大于0 */
             globalAlpha: 0.5,
             rotateAngle: 0,
-            xMoveDistance: 70,
-            yMoveDistance: 70,
-            
+            xMoveDistance: 70,/* 必须大于0 */
+            yMoveDistance: 70,/* 必须大于0 */
+
         }
         for (let key in options) {
             if (typeof opts[key] !== "undefined") {
                 options[key] = opts[key];
             }
         }
-
+        options.width = parseInt(options.width) > 0 ? options.width: 1;
+        options.height = parseInt(options.height) > 0 ? options.height: 1;
+        options.xMoveDistance = parseInt(options.xMoveDistance) > 0 ? options.xMoveDistance: 1;
+        options.yMoveDistance = parseInt(options.yMoveDistance) > 0 ? options.yMoveDistance: 1;
         let ctx = this.canvas.getContext('2d');
 
         let waterImageCanvasArray = [];
@@ -415,7 +436,8 @@
         let waterDrawPosX = (waterImageCanvasDiagonal - options.width) / 2; /* 水印里图片坐标x */
         let waterDrawPosY = (waterImageCanvasDiagonal - options.height) / 2; /* 水印里图片坐标y */
 
-        Array.from(options.imageArray).forEach( item=>{/* 先把水印绘制好 */
+        Array.from(options.imageArray).forEach(item => {
+            /* 先把水印绘制好 */
             var waterImageCanvas = document.createElement("canvas");
             var waterctx = waterImageCanvas.getContext("2d");
 
@@ -429,7 +451,9 @@
 
             waterImageCanvasArray = waterImageCanvasArray.concat(waterImageCanvas);
         })
-        function randomArrayData(array_data){/* 随机项 */
+
+        function randomArrayData(array_data) {
+            /* 随机项 */
             return array_data[Math.floor(Math.random() * array_data.length)];
         }
         ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -438,16 +462,22 @@
             /* 右侧铺满 */
             for (let j = centerDrawLeftPosY; j < canvasHeight; j += yMoveDistance) {
                 /* 右下 */
-                if(!checkInArrayByPos(pos,i,j)){
-                    pos = pos.concat({"x":i,"y":j});
+                if (!checkInArrayByPos(pos, i, j)) {
+                    pos = pos.concat({
+                        "x": i,
+                        "y": j
+                    });
                     ctx.drawImage(randomArrayData(waterImageCanvasArray), i, j); /* 绘制水印 */
                 }
 
             }
             for (let k = centerDrawLeftPosY; k > -Math.abs(waterImageCanvasDiagonal); k -= yMoveDistance) {
                 /* 右上 */
-                if(!checkInArrayByPos(pos,i,k)){
-                    pos = pos.concat({"x":i,"y":k});
+                if (!checkInArrayByPos(pos, i, k)) {
+                    pos = pos.concat({
+                        "x": i,
+                        "y": k
+                    });
                     ctx.drawImage(randomArrayData(waterImageCanvasArray), i, k);
                 }
             }
@@ -456,15 +486,21 @@
             /* 左侧铺满 */
             for (let j = centerDrawLeftPosY; j < canvasHeight; j += yMoveDistance) {
                 /* 左下 */
-                if(!checkInArrayByPos(pos,i,j)){
-                    pos = pos.concat({"x":i,"y":j});
+                if (!checkInArrayByPos(pos, i, j)) {
+                    pos = pos.concat({
+                        "x": i,
+                        "y": j
+                    });
                     ctx.drawImage(randomArrayData(waterImageCanvasArray), i, j);
                 }
             }
             for (let k = centerDrawLeftPosY; k > -Math.abs(waterImageCanvasDiagonal); k -= yMoveDistance) {
                 /* 左上 */
-                if(!checkInArrayByPos(pos,i,k)){
-                    pos = pos.concat({"x":i,"y":k});
+                if (!checkInArrayByPos(pos, i, k)) {
+                    pos = pos.concat({
+                        "x": i,
+                        "y": k
+                    });
                     ctx.drawImage(randomArrayData(waterImageCanvasArray), i, k);
                 }
             }
@@ -472,6 +508,7 @@
 
 
     }
+
     /* 获得原图 */
     Watermark.prototype.getPreview = function () {
         return this.dataUrl;
@@ -483,5 +520,14 @@
         return this.canvas.toDataURL("image/" + type);
     };
 
+    /* 绘制图片Blob Url-异步 */
+    Watermark.prototype.renderBlob = function () {
+        let self = this;
+        return new Promise( res=>{
+            self.canvas.toBlob(function(blob){
+                res(window.URL.createObjectURL(blob));
+            })
+        })
+    };
     return Watermark;
 }));
