@@ -18,10 +18,14 @@ async function addWater(bgBase64Src){
         fontSize: '5vw',
         ...参数很多就不举例了
     });
-    return watermark.render('png');
+    return watermark;
 }
-addWater();
-
+var waterObj = addWater();
+var waterBase64Src = waterObj.render('png');
+var waterBlobUrl = '';
+waterObj.renderBlob().then( (blobUrl)=>{
+    waterBlobUrl = blobUrl;
+});
 ```
 
 ③ 调用（通过`file`传入的用法）
@@ -125,6 +129,12 @@ addWater();
 ```
 @param type {String} 图片类型，可传入`jpeg`（不支持透明）或`png`（支持透明），默认为`jpeg`。
 @return {String} 原图添加水印后的 base64 编码的字符串
+```
+绘制结果图片，返回`base64`编码字符串。
+
+## .renderBlob()
+```
+@return {String} 原图添加水印后的  blob格式的URL，可以直接访问该链接，该方法为`异步`，需要同步请用`await`或者`then`
 ```
 绘制结果图片，返回`base64`编码字符串。
 
