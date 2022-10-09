@@ -105,11 +105,30 @@ addWater();
 * `fontFamily`全局字体类型，默认值为`Microsoft Yahei`。
 * `color`全局字体颜色，默认值为`#000000`。
 * `textAlign`文字对齐方式, 参数有`left`|`center`|`right`，默认值`center`。
+* `stroke`文字描边，默认值为`false`。
 * `globalAlpha` 透明度，取值范围 0.00 ~ 1.00，默认值`0.7`。
 * `rotateAngle` 旋转角度，取值范围 -360 ~ 360，默认值`50`。
 * `maxWidth` 文字最大宽度，超过宽度会换行，默认值`100`px。
 * `xMoveDistance` 每个文字的左右间距，取值范围 不限，默认值`30`，最好是`测量出文字占据宽度`+`文字间距`。
 * `yMoveDistance` 每个文字的上下间距，取值范围 不限，默认值`30`，最好是`测量出文字占据高度`+`文字间距`。
+
+## .addPixelText(opts)
+```
+@param opts {Object} 像素水印文字样式配置
+```
+* `text`全局水印文字，在添加水印时若不指定水印文字，则会默认使用全局水印文字，默认值为`像素文字水印`。
+* `big`要绘制的文字像素配置信息。
+* `fontSize`要绘制的文字像素 文字大小，默认值为`150`。
+* `fontFamily`要绘制的文字像素 字体类型，默认值为`微软雅黑`。
+* `textAlign`要绘制的文字像素 文字对齐方式，参数有`left`|`center`|`right`，默认值`center`。
+* `rotateAngle`要绘制的文字像素 旋转角度，取值范围 -360 ~ 360，默认值`0`。
+* `stroke`要绘制的文字像素 描边，默认值为`false`。
+* `small`组成绘制的文字像素配置信息。
+* `fontSize`组成绘制的文字像素配置信息 文字大小，默认值为`10`。
+* `fontFamily`组成绘制的文字像素配置信息 字体类型，默认值为`微软雅黑`。
+* `color`组成绘制的文字像素配置信息 字体颜色，默认值为`#000`。
+* `textAlign`组成绘制的文字像素配置信息 文字对齐方式，参数有`left`|`center`|`right`，默认值`center`。
+* `color`组成绘制的文字像素配置信息 透明度，默认值为`0.7`。
 
 ## .addImage(opts)
 ```
@@ -145,4 +164,5 @@ addWater();
 
 方式1 - 传入 file 对象，通过主动调用实例方法生成水印图：[在线demo](https://WhiteSevs.github.io/js-watermark/demo/example1.html)
 
+方式2 - 传入 file 对象，通过主动调用实例方法生成水印像素文字图：[在线demo](https://WhiteSevs.github.io/js-watermark/demo/example2.html)
 
