@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>js-watermark</title>
+	<script src="../src/js-watermark.js"></script>
+	<style>
+		.water-text div,
+		.water-pixel-text div {
+			margin: 10px 0;
+			display: flex;
+			align-items: center;
+		}
+
+		.water-text p,
+		.water-pixel-text p {
+			width: 100px;
+		}
+	</style>
+</head>
+
+<body>
+	<h2>方式2 - 传入 file 对象，通过主动调用实例方法生成水印像素文字图</h2>
+	<div style="display: flex;">
+		<div class="water-text" style="width: 25vw;">
+			<div>
+				<p text-before="上传文件" text-end=""></p><input type="file" id="uploadFile">
+			</div>
+			<div>
+				<p text-before="文字" text-end=""></p><input type="text" id="mtext" placeholder="文字" value="测试水印文字,js-watermark"
+					disabled="true">
+			</div>
+			<div>
+				<p text-before="大小" text-end="px"></p><input type="range" id="msize" max="300" min="1" step="1" value="50"
+					disabled="true">
+			</div>
+			<div>
+				<p text-before="颜色" text-end=""></p><input type="color" id="mcolor" disabled="true">
+			</div>
+			<div>
+				<p text-before="字体" text-end=""></p><input type="text" id="mfontfamily" placeholder="字体" value="Microsoft Yahei"
+					disabled="true">
+			</div>
+			<div>
+				<p text-before="透明度" text-end=""></p><input type="range" id="mglobalAlpha" max="1" min="0" step="0.01"
+					value="0.7" disabled="true">
+			</div>
+			<div>
+				<p text-before="旋转角度" text-end=""></p><input type="range" id="mrotateAngle" max="360" min="-360" step="1"
+					value="45" disabled="true">
+			</div>
+			<div>
+				<p text-before="最大宽度" text-end="px"></p><input type="range" id="mmaxWidth" max="400" min="1" step="1"
+					value="200" disabled="true">
+			</div>
+			<div>
+				<p text-before="上下间距" text-end="px"></p><input type="range" id="myMoveDistance" max="400" min="1" step="1"
+					value="300" disabled="true">
+			</div>
+			<div>
+				<p text-before="左右间距" text-end="px"></p><input type="range" id="mxMoveDistance" max="400" min="1" step="1"
+					value="300" disabled="true">
+			</div>
+
+
+		</div>
+		<div class="water-pixel-text" style="width: 25vw;">
+			<div>
+				<p text-before="文字" text-end=""></p><input type="text" id="ntext" placeholder="像素文字" value="像素文字测试"
+					disabled="true">
+			</div>
+			<div>
+				<p text-before="像素文字大小" text-end="px"></p><input type="range" id="nBigFontSize" max="1000" min="10" step="1"
+					value="150">
+			</div>
+			<div>
+				<p text-before="像素文字字体" text-end=""></p><input type="text" id="nBigFontFamily" placeholder="像素文字字体" value="微软雅黑"
+					disabled="true">
+			</div>
+			<div>
+				<p text-before="像素文字旋转角度" text-end=""></p><input type="range" id="nBigRotateAngle" max="360" min="-360" step="1"
+					value="0">
+			</div>
+			<div>
+				<p text-before="像素文字是否描边" text-end=""></p><input type="checkbox" id="nBigStroke">
+			</div>
+			<div>
+				<p text-before="绘制像素文字大小" text-end="px"></p><input type="range" id="nSmallFontSize" max="1000" min="10" step="1"
+					value="10">
+			</div>
+			<div>
+				<p text-before="绘制像素文字字体" text-end=""></p><input type="text" id="nSmallFontFamily" placeholder="像素文字字体"
+					value="微软雅黑" disabled="true">
+			</div>
+			<div>
+				<p text-before="绘制像素文字颜色" text-end=""></p><input type="color" id="nSmallFontColor" disabled="true">
+			</div>
+			<div>
+				<p text-before="绘制像素文字透明度" text-end=""></p><input type="range" id="nSmallGlobalAlpha" max="1" min="0"
+					value="0.7" step="0.01">
+			</div>
+		</div>
+		<div style="width: 50vw;display: flex;">
+			<div style="width: 16vw;">
+				<h3>原图：</h3>
+				<img id="imgY" style="width: 100%;" src="">
+			</div>
+			<div style="width: 16vw;">
+				<h3>水印文字：</h3>
+				<img id="imgT" style="width: 100%;" src="">
+			</div>
+			<div style="width: 16vw;">
+				<h3>水印像素文字</h3>
+				<img id="imgI" style="width: 100%;" src="">
+			</div>
+		</div>
+	</div>
+</body>
+<script>
+	/* 通用方法类 */
+	function loadImage(src) {
+		let image = new Image();
+		return new Promise(res => {
+			image.onload = () => {
+				res(image);
+			}
+
+			image.src = src
+		})
+	}
+
+	function loadFile(file) {
+		let fileReader = new FileReader();
+		return new Promise(res => {
+			fileReader.onloadend = async function (e) {
+				res(fileReader);
+			}
+			fileReader.readAsDataURL(file);
+		})
+	}
+
+	function asyncFileToBase64(file) {
+		let reader = new FileReader();
+		reader.readAsDataURL(file);
+		return new Promise(res => {
+			reader.onload = function (e) {
+				res(e.target.result);
+			}
+		})
+
+	}
+	/* 水印 */
+	var watermark = new Watermark();
+	var watermark2 = new Watermark();
+
+	async function changeImage(file) {
+		await watermark.setFile(file);
+		watermark.clearMark();
+		watermark.addText({
+			text: document.querySelector("#mtext").value.split(","),
+			fontSize: document.querySelector("#msize").value,
+			fontFamily: document.querySelector("#mfontfamily").value,
+			color: document.querySelector("#mcolor").value,
+			textAlign: "center",
+			globalAlpha: parseFloat(document.querySelector("#mglobalAlpha").value),
+			rotateAngle: parseInt(document.querySelector("#mrotateAngle").value),
+			maxWidth: parseInt(document.querySelector("#mmaxWidth").value),
+			xMoveDistance: parseInt(document.querySelector("#mxMoveDistance").value),
+			yMoveDistance: parseInt(document.querySelector("#myMoveDistance").value)
+		});
+		document.querySelector("#imgT").src = watermark.render("png");
+		let blob = await watermark.renderBlob();
+		console.log(blob);
+	}
+	async function changeImage2(file) {
+		await watermark2.setFile(file);
+		watermark2.clearMark();
+		watermark2.addPixelText({
+			text: document.querySelector("#ntext").value,
+			/* 像素文字 */
+			big: {
+				fontSize: parseInt(document.querySelector("#nBigFontSize").value),
+				fontFamily: document.querySelector("#nBigFontFamily").value,
+				textAlign: "center",
+				rotateAngle: parseInt(document.querySelector("#nBigRotateAngle").value),
+				/* 描边 */
+				stroke: document.querySelector("#nBigStroke").checked,
+			},
+			/* 绘制像素的文字 */
+			small: {
+				fontSize: parseInt(document.querySelector("#nSmallFontSize").value),
+				fontFamily: document.querySelector("#nSmallFontFamily").value,
+				color: document.querySelector("#nSmallFontColor").value,
+				textAlign: "center",
+				globalAlpha: parseFloat(document.querySelector("#nSmallGlobalAlpha").value),
+			},
+		});
+		document.querySelector("#imgI").src = watermark2.render("png");
+	}
+	/* 下面是页面事件，动态设置页面参数水印用的 */
+	function setDisabled() {
+		document.querySelectorAll("input").forEach(item => {
+			item.setAttribute("disabled", true)
+		})
+		document.querySelectorAll("textarea").forEach(item => {
+			item.setAttribute("disabled", true)
+		})
+	}
+
+	function removeDisabled() {
+		document.querySelectorAll("input").forEach(item => {
+			item.removeAttribute("disabled")
+		})
+		document.querySelectorAll("textarea").forEach(item => {
+			item.removeAttribute("disabled")
+		})
+	}
+
+
+	setDisabled();
+	document.querySelector("#uploadFile").removeAttribute("disabled");
+	async function main() {
+		document.querySelector("#uploadFile").addEventListener("change", (e) => {
+			removeDisabled();
+			asyncFileToBase64(e.target.files[0]).then(base64 => {
+				document.querySelector("#imgY").src = base64;
+			})
+			changeImage(e.target.files[0]);
+			changeImage2(e.target.files[0]);
+		})
+	}
+
+	function setPageText() {
+		document.querySelectorAll("p").forEach(function (item) {
+			let value = "";
+			if (item.nextSibling.tagName === "INPUT" && item.nextSibling.getAttribute("type") != null && item.nextSibling
+				.getAttribute("type") !== "file" && item.nextSibling
+				.getAttribute("type") !== "textarea" && item.nextSibling
+				.getAttribute("type") !== "text") {
+				if (item.nextSibling.getAttribute("type") == "checkbox") {
+					value = item.nextSibling.checked ? "开" : "关";
+				} else {
+					value = item.nextSibling.value;
+				}
+			}
+			item.innerHTML = item.getAttribute("text-before") + " " + value + item.getAttribute("text-end");
+		})
+	}
+	setPageText()
+	document.querySelectorAll("input").forEach(function (item) {
+
+		if (item.getAttribute("type") !== "file") {
+			item.oninput = () => {
+				setPageText();
+				if ((item.parentElement.parentElement.getAttribute("class") == "water-text")) {
+					changeImage(document.querySelector("#uploadFile").files[0]);
+				} {
+					changeImage2(document.querySelector("#uploadFile").files[0]);
+				}
+
+			}
+		}
+	})
+
+
+
+	main();
+</script>
+
+</html>
